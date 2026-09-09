@@ -1,0 +1,29 @@
+# Dependencies
+h3-app/node_modules/
+
+# Build output
+h3-app/src-tauri/target/
+h3-app/src-tauri/gen/schemas/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Logs
+*.log
+
+# NPM local config
+h3-app/.npmrc
+
+# Release artifacts (uploaded to GitHub Releases, not in repo)
+*.dmg
