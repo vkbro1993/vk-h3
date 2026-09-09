@@ -1,0 +1,14 @@
+# 依赖与构建产物
+node_modules/
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# 打包进 app 的大二进制（走 Release 附件，不进 git）
+src-tauri/binaries/h3
+src-tauri/binaries/ffmpeg
+
+# 输出与临时文件
+output/
+*.mp4
+.DS_Store
+*.log
