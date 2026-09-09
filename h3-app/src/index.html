@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>vk-h3</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-layer"></div>
+
+  <header class="topbar">
+    <div class="brand drag-region">
+      <span class="traffic-spacer"></span>
+      <img class="logo" src="logo.png" alt="vk-h3" />
+      <span class="title">vk-h3</span>
+      <span class="subtitle">MiniMax-H3 · v1.1</span>
+    </div>
+    <div class="topbar-right">
+      <div class="lang-switch" id="langSwitch" role="tablist" aria-label="Language">
+        <button type="button" class="lang-btn active" data-lang="zh">中文</button>
+        <button type="button" class="lang-btn" data-lang="en">EN</button>
+      </div>
+      <label class="hint-toggle" data-i18n-title="topbar.hints.title">
+        <input id="showHints" type="checkbox" />
+        <span data-i18n="topbar.hints">显示说明</span>
+      </label>
+      <div class="status-chip" id="statusChip"><span class="dot"></span><span id="statusText">就绪</span></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card glass left" id="settingsPanel">
+      <!-- 预设 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.presets">预设</div>
+        <div class="preset-row">
+          <button class="btn-preset" data-preset="balanced" data-i18n-title="preset.balanced.title" type="button">均衡<div class="preset-desc">20 · 50 · reuse 2</div></button>
+          <button class="btn-preset" data-preset="fast" data-i18n-title="preset.fast.title" type="button">快速<div class="preset-desc">20 · 45 · reuse 2</div></button>
+          <button class="btn-preset" data-preset="aggressive" data-i18n-title="preset.aggressive.title" type="button">激进<div class="preset-desc">4 · 40 · reuse 3 · 320</div></button>
+        </div>
+        <div class="hint" data-i18n="presets.hint">一键套用常用参数组合，之后仍可微调。</div>
+      </div>
+
+      <!-- 模型与输出 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.model">模型与输出</div>
+        <div class="field">
+          <label for="modelDir"><span data-i18n="label.modelDir">模型目录</span> <span class="flag">-d</span></label>
+          <div class="row-flex">
+            <input id="modelDir" type="text" spellcheck="false" data-i18n-placeholder="modelDir.placeholder" style="flex:1" />
+            <button id="pickModelDir" class="btn-ghost" type="button" data-i18n="btn.select">选择…</button>
+          </div>
+          <div class="hint" data-i18n="modelDir.hint">选择模型文件夹（含 model_index.json 或 FL2VA/）。留空自动检测 ~/vk-h3/models/。</div>
+        </div>
+        <div class="field">
+          <label for="outputDir" data-i18n="label.outputDir">输出目录</label>
+          <div class="row-flex">
+            <input id="outputDir" type="text" spellcheck="false" data-i18n-placeholder="outputDir.placeholder" style="flex:1" />
+            <button id="pickOutputDir" class="btn-ghost" type="button" data-i18n="btn.select">选择…</button>
+          </div>
+          <div class="hint" data-i18n="outputDir.hint">留空=默认 ~/vk-h3/output/。可自定义任意位置。</div>
+        </div>
+        <div class="field">
+          <label for="prompt"><span data-i18n="label.prompt">提示词</span> <span class="flag">-p</span></label>
+          <textarea id="prompt" rows="5" data-i18n-placeholder="prompt.placeholder"></textarea>
+          <div class="prompt-bar">
+            <select id="promptHistory" class="prompt-history"><option value="">— 历史 —</option></select>
+            <button id="clearPrompt" class="btn-ghost" type="button" data-i18n="btn.clear">清空</button>
+          </div>
+          <div class="hint" data-i18n="prompt.hint">直接传给 h3 的原始提示词，决定视频内容。建议用英文。</div>
+        </div>
+        <div class="field">
+          <label for="output"><span data-i18n="label.output">输出文件</span> <span class="flag">-o</span></label>
+          <input id="output" type="text" value="out.mp4" spellcheck="false" />
+          <div class="hint" data-i18n="output.hint">输出到 ~/vk-h3/output/。相对路径拼接于此；也可填绝对路径。</div>
+        </div>
+      </div>
+
+      <!-- 画布 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.canvas">画布</div>
+        <div class="grid2">
+          <div class="field">
+            <label for="width"><span data-i18n="label.width">宽度</span> <span class="flag">--width</span></label>
+            <input id="width" type="number" value="1344" min="32" step="32" />
+            <div class="hint" data-i18n="width.hint">必须是 32 的倍数，宽×高 ≤ 768×1344。</div>
+          </div>
+          <div class="field">
+            <label for="height"><span data-i18n="label.height">高度</span> <span class="flag">--height</span></label>
+            <input id="height" type="number" value="768" min="32" step="32" />
+            <div class="hint" data-i18n="height.hint">必须是 32 的倍数。</div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="renderWidth"><span data-i18n="label.renderWidth">内部渲染宽</span> <span class="flag">--render-width</span></label>
+            <input id="renderWidth" type="number" value="0" min="0" step="32" data-i18n-placeholder="renderWidth.placeholder" />
+            <div class="hint" data-i18n="renderWidth.hint">0=原生。降低内部画布省显存，需与高度同时设置。</div>
+          </div>
+          <div class="field">
+            <label for="renderHeight"><span data-i18n="label.renderHeight">内部渲染高</span> <span class="flag">--render-height</span></label>
+            <input id="renderHeight" type="number" value="0" min="0" step="32" data-i18n-placeholder="renderHeight.placeholder" />
+            <div class="hint" data-i18n="renderHeight.hint">0=原生。宽高比须与输出一致。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 时长 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.duration">时长</div>
+        <div class="field">
+          <label data-i18n="label.durationMode">时长模式</label>
+          <div class="segmented" id="durationMode">
+            <button type="button" data-mode="seconds" class="active"><span data-i18n="mode.seconds">秒数</span> <span class="flag">--seconds</span></button>
+            <button type="button" data-mode="frames"><span data-i18n="mode.frames">帧数</span> <span class="flag">--frames</span></button>
+          </div>
+          <div class="hint" data-i18n="duration.hint">秒数按 24fps 自动换算；h3 按 5+17n 对齐帧数。</div>
+        </div>
+        <div class="field" id="secondsField">
+          <label for="seconds" data-i18n="label.seconds">时长（秒）</label>
+          <input id="seconds" type="number" value="15" min="1" max="15" />
+          <div class="hint" data-i18n="seconds.hint">范围 1–15 秒。h3 会自动对齐到合法帧数。</div>
+        </div>
+        <div class="field" id="framesField" hidden>
+          <label for="frames" data-i18n="label.frames">帧数</label>
+          <input id="frames" type="number" value="56" min="5" max="362" />
+          <div class="hint" data-i18n="frames.hint">对齐到 5+17n（5、22、39、56…），上限 362。</div>
+        </div>
+      </div>
+
+      <!-- 质量与速度 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.quality">质量与速度</div>
+        <div class="grid3">
+          <div class="field">
+            <label for="steps">Steps <span class="flag">--steps</span></label>
+            <input id="steps" type="number" value="20" min="2" max="1000" />
+            <div class="hint" data-i18n="steps.hint">去噪步数。越多质量越高越慢。范围 2–1000。</div>
+          </div>
+          <div class="field">
+            <label for="reuse">Reuse</label>
+            <select id="reuse">
+              <option value="1">1 · close</option>
+              <option value="2" selected>2 · fast</option>
+              <option value="3">3 · aggressive</option>
+            </select>
+            <div class="hint" data-i18n="reuse.hint">每 N 步完整评估一次。1 精确 / 2 快速 / 3 激进。</div>
+          </div>
+          <div class="field">
+            <label for="layers">Layers</label>
+            <select id="layers">
+              <option value="50" selected>50 · exact</option>
+              <option value="45">45 · fast</option>
+              <option value="40">40 · aggressive</option>
+            </select>
+            <div class="hint" data-i18n="layers.hint">DiT 残差块数。50 精确 / 45 快速 / 40 激进。</div>
+          </div>
+        </div>
+        <div class="grid3">
+          <div class="field">
+            <label for="coreReuse">Core Reuse</label>
+            <select id="coreReuse">
+              <option value="1" selected>1 · exact</option>
+              <option value="4">4 · fast</option>
+              <option value="6">6 · aggressive</option>
+            </select>
+            <div class="hint" data-i18n="coreReuse.hint">每 N 步重算核心。1 精确 / 4 快速 / 6 激进。与 Reuse>1 互斥。</div>
+          </div>
+          <div class="field check">
+            <input id="tokenReduction" type="checkbox" checked />
+            <label for="tokenReduction">Token Reduction</label>
+            <div class="hint" data-i18n="tokenReduction.hint">成对合并中间 token 加速，保留全分辨率残差。</div>
+          </div>
+          <div class="field check">
+            <input id="ssdStreaming" type="checkbox" checked />
+            <label for="ssdStreaming">SSD Streaming</label>
+            <div class="hint" data-i18n="ssdStreaming.hint">流式加载避免 134GB 模型占满内存。与 Int8 互斥。</div>
+          </div>
+        </div>
+        <div class="grid3">
+          <div class="field check">
+            <input id="int8RowFc2" type="checkbox" />
+            <label for="int8RowFc2">Int8 Row FC2</label>
+            <div class="hint" data-i18n="int8RowFc2.hint">更快但更激进，需 M5 GPU。与 SSD/BF16 MLP 互斥。</div>
+          </div>
+          <div class="field check">
+            <input id="referenceRope" type="checkbox" />
+            <label for="referenceRope">Reference RoPE</label>
+            <div class="hint" data-i18n="referenceRope.hint">恢复 256×256 原始 RoPE 网格。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 高级兼容开关（可折叠） -->
+      <div class="section">
+        <div class="section-title collapsible-header" id="advancedHeader">
+          <span><span data-i18n="section.advanced">高级兼容</span> <span class="flag">--use-slower-*</span></span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="hint" data-i18n="advanced.hint">强制使用更接近参考实现的慢速路径，排查兼容性或对比性能。默认关闭。</div>
+        <div class="toggle-grid" id="advancedBody" hidden>
+          <div class="field check"><input id="slowerBf16Mlp" type="checkbox" /><label for="slowerBf16Mlp" data-i18n-title="adv.bf16Mlp.title">BF16 MLP</label><div class="hint" data-i18n="adv.bf16Mlp.hint">强制慢速 BF16 MLP。与 Int8 互斥。</div></div>
+          <div class="field check"><input id="slowerBf16Qkv" type="checkbox" /><label for="slowerBf16Qkv" data-i18n-title="adv.bf16Qkv.title">BF16 QKV</label><div class="hint" data-i18n="adv.bf16Qkv.hint">强制慢速 BF16 QKV 投影。</div></div>
+          <div class="field check"><input id="slowerBf16AttnOut" type="checkbox" /><label for="slowerBf16AttnOut" data-i18n-title="adv.bf16AttnOut.title">BF16 Attn Out</label><div class="hint" data-i18n="adv.bf16AttnOut.hint">强制慢速 attention 输出。</div></div>
+          <div class="field check"><input id="slowerRowMajorAttnOut" type="checkbox" /><label for="slowerRowMajorAttnOut" data-i18n-title="adv.rowMajor.title">Row-major Attn</label><div class="hint" data-i18n="adv.rowMajor.hint">SDPA 后物化 row-major BF16。</div></div>
+          <div class="field check"><input id="slowerUnfusedInt8Inputs" type="checkbox" /><label for="slowerUnfusedInt8Inputs" data-i18n-title="adv.unfusedInt8.title">Unfused Int8</label><div class="hint" data-i18n="adv.unfusedInt8.hint">保留独立 int8 输入量化。</div></div>
+          <div class="field check"><input id="slowerUnfusedQkvRope" type="checkbox" /><label for="slowerUnfusedQkvRope" data-i18n-title="adv.unfusedQkvRope.title">Unfused QKV RoPE</label><div class="hint" data-i18n="adv.unfusedQkvRope.hint">int8 后独立 Q/K norm/RoPE。</div></div>
+          <div class="field check"><input id="slowerScalarQkvRms" type="checkbox" /><label for="slowerScalarQkvRms" data-i18n-title="adv.scalarQkvRms.title">Scalar QKV RMS</label><div class="hint" data-i18n="adv.scalarQkvRms.hint">强制标量 BF16 加载。</div></div>
+          <div class="field check"><input id="slowerUncachedInt8Scales" type="checkbox" /><label for="slowerUncachedInt8Scales" data-i18n-title="adv.uncachedInt8.title">Uncached Int8</label><div class="hint" data-i18n="adv.uncachedInt8.hint">每次重读 int8 缩放。</div></div>
+          <div class="field check"><input id="slowerDynamicFc1K" type="checkbox" /><label for="slowerDynamicFc1K" data-i18n-title="adv.dynamicFc1K.title">Dynamic FC1 K</label><div class="hint" data-i18n="adv.dynamicFc1K.hint">运行时绑定 FC1 K 循环。</div></div>
+          <div class="field check"><input id="slowerGroupedQuantizer" type="checkbox" /><label for="slowerGroupedQuantizer" data-i18n-title="adv.groupedQuantizer.title">Grouped Quantizer</label><div class="hint" data-i18n="adv.groupedQuantizer.hint">强制 256 线程 FC2 量化器。</div></div>
+        </div>
+      </div>
+
+      <!-- 种子 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.seed">种子</div>
+        <div class="grid2">
+          <div class="field check">
+            <input id="randomSeed" type="checkbox" />
+            <label for="randomSeed" data-i18n="label.randomSeed">随机种子</label>
+            <div class="hint" data-i18n="randomSeed.hint">每次生成随机 seed。</div>
+          </div>
+          <div class="field">
+            <label for="seed"><span data-i18n="label.seed">种子值</span> <span class="flag">--seed</span></label>
+            <input id="seed" type="number" value="42" min="0" />
+            <div class="hint" data-i18n="seed.hint">固定种子，相同参数可复现。默认 42。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 首尾帧 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.framesIO">首尾帧</div>
+        <div class="grid2">
+          <div class="field">
+            <label for="firstFrame"><span data-i18n="label.firstFrame">首帧</span> <span class="flag">--first-frame</span></label>
+            <div class="row-flex">
+              <input id="firstFrame" type="text" data-i18n-placeholder="firstFrame.placeholder" spellcheck="false" style="flex:1" />
+              <button id="pickFirstFrame" class="btn-ghost" type="button">…</button>
+            </div>
+            <div class="hint" data-i18n="firstFrame.hint">首帧条件化图片。引导视频第一帧。</div>
+          </div>
+          <div class="field">
+            <label for="lastFrame"><span data-i18n="label.lastFrame">尾帧</span> <span class="flag">--last-frame</span></label>
+            <div class="row-flex">
+              <input id="lastFrame" type="text" data-i18n-placeholder="lastFrame.placeholder" spellcheck="false" style="flex:1" />
+              <button id="pickLastFrame" class="btn-ghost" type="button">…</button>
+            </div>
+            <div class="hint" data-i18n="lastFrame.hint">尾帧条件化图片。引导视频最后一帧。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 参考输入 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.refs">参考输入（Ref2VA）</div>
+        <div class="field">
+          <label for="refImageSize"><span data-i18n="label.refImageSize">参考图尺寸</span> <span class="flag">--ref-image-size</span></label>
+          <select id="refImageSize">
+            <option value="match" selected>match</option>
+            <option value="max">max</option>
+          </select>
+          <div class="hint" data-i18n="refImageSize.hint">match 匹配输出面积 / max 短边上限。</div>
+        </div>
+        <div id="refList"></div>
+        <button id="addRefBtn" class="btn-ghost" type="button" data-i18n="btn.addRef">+ 添加参考</button>
+        <div class="hint" data-i18n="refs.hint">最多 12 个参考。类型：图片 / 视频(含音频) / 视频(静音) / 视频+音频 / 音频。</div>
+      </div>
+
+      <!-- 帧输出与调试 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.debug">帧输出与调试</div>
+        <div class="grid2">
+          <div class="field">
+            <label for="framesDir"><span data-i18n="label.framesDir">帧目录</span> <span class="flag">--frames-dir</span></label>
+            <div class="row-flex">
+              <input id="framesDir" type="text" data-i18n-placeholder="framesDir.placeholder" spellcheck="false" style="flex:1" />
+              <button id="pickFramesDir" class="btn-ghost" type="button">…</button>
+            </div>
+            <div class="hint" data-i18n="framesDir.hint">逐帧输出 PPM 到此目录。</div>
+          </div>
+          <div class="field">
+            <label for="zoom">Zoom</label>
+            <input id="zoom" type="number" value="2" min="1" />
+            <div class="hint" data-i18n="zoom.hint">终端图像缩放，仅配合 Show。Retina 默认 2。</div>
+          </div>
+        </div>
+        <div class="grid3">
+          <div class="field check">
+            <input id="show" type="checkbox" />
+            <label for="show">Show</label>
+            <div class="hint" data-i18n="show.hint">每步去噪后显示预览帧。</div>
+          </div>
+          <div class="field check">
+            <input id="profile" type="checkbox" />
+            <label for="profile">Profile</label>
+            <div class="hint" data-i18n="profile.hint">打印 Metal 计时与显存数据。</div>
+          </div>
+          <div class="field check">
+            <input id="autoOpen" type="checkbox" />
+            <label for="autoOpen" data-i18n="label.autoOpen">自动打开</label>
+            <div class="hint" data-i18n="autoOpen.hint">完成后自动用播放器打开。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLI 命令预览 -->
+      <div class="section">
+        <div class="section-title" data-i18n="section.cmd">CLI 命令预览</div>
+        <pre id="cmdPreview" class="cmd-preview"></pre>
+        <div class="hint" data-i18n="cmd.hint">实时显示将要传给 h3 的完整命令，确保 GUI 与 CLI 同步。</div>
+      </div>
+
+      <!-- 生成/停止 -->
+      <div class="btn-row">
+        <button id="generateBtn" class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          <span id="btnText" data-i18n="btn.generate">生成视频</span>
+        </button>
+        <button id="stopBtn" class="btn-stop" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="6" y="6" width="12" height="12" rx="1"/>
+          </svg>
+          <span data-i18n="btn.stop">停止</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="card glass right">
+      <div class="log-head">
+        <span data-i18n="log.title">运行日志</span>
+        <div class="right-actions">
+          <button id="inspectBtn" class="btn-ghost" data-i18n-title="btn.info.title">--info</button>
+          <button id="saveVideoBtn" class="btn-ghost" data-i18n="btn.saveAs" data-i18n-title="btn.saveAs.title">另存</button>
+          <button id="openOutputBtn" class="btn-ghost" data-i18n="btn.outputDir" data-i18n-title="btn.outputDir.title">输出目录</button>
+          <button id="clearLog" class="btn-ghost" data-i18n="btn.clear">清空</button>
+        </div>
+      </div>
+      <div class="log-toolbar">
+        <label class="check-inline">
+          <input id="autoScroll" type="checkbox" checked /> <span data-i18n="label.autoScroll">自动滚动</span>
+        </label>
+      </div>
+      <div id="log" class="log"></div>
+      <div class="progress-wrap" id="progressWrap" hidden>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="progress-text" id="progressText"></span>
+      </div>
+    </section>
+  </main>
+
+  <script src="i18n.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
